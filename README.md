@@ -30,9 +30,12 @@ This project is licensed under the **GNU General Public License v3.0 (GPLv3)** -
 * **pifmadv:** This project uses [pifmadv](https://github.com/miegl/PiFmAdv), an advanced FM transmitter software for Raspberry Pi, licensed under the GNU General Public License v3.0 (GPLv3).
 * **RetroFM Enclosure Design:** The 3D enclosure models included in this repository are released under the **GNU GPLv3** alongside the software codebase.
 
-## Filter Example:
+### Filter Example
+
+```text
 Raspberry Pi               Filter Module                Antenna
 [ GPIO 4 ] ───▶ [ 56nH Inductor ] ──┬── [ 56nH Inductor ] ───▶  [ Wire ]
-.....................................│
-............................[ 22pF Capacitor]
-[  GND   ] ─────────────────────────┴────────────────────────▶  [ GND ]
+                                    │
+                                [ 22pF ]
+                                    │
+[  GND   ] ─────────────────────────┴────────────────────────▶  [ GND  ]
