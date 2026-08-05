@@ -33,7 +33,6 @@ This project is licensed under the **GNU General Public License v3.0 (GPLv3)** -
 ## Filter Example:
 Raspberry Pi               Filter Module                Antenna
 [ GPIO 4 ] ───▶ [ 56nH Inductor ] ──┬── [ 56nH Inductor ] ───▶  [ Wire ]
-                                    │
-                                 [ 22pF Capacitor]
-                                    │
+.....................................│
+............................[ 22pF Capacitor]
 [  GND   ] ─────────────────────────┴────────────────────────▶  [ GND ]
