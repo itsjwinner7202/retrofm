@@ -9,6 +9,8 @@ RetroFM is a Raspberry Pi-based FM radio transmitter featuring an intuitive web 
 >
 > **2. Disclaimer of Liability:** 
 > This project is provided "AS IS" for educational and experimental purposes only. The creators and contributors of RetroFM take no responsibility for any interference caused, regulatory fines incurred, or legal action taken as a result of using this software or hardware design. Operational compliance rests entirely on the end user.
+>
+> **3.This project is intended strictly for ultra-low-power, short-range experimental use within your immediate vehicle or room.**
 
 ---
 
