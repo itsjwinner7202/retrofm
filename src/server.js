@@ -6,7 +6,6 @@ const fs = require('fs');
 const app = express();
 const PORT = 3000;
 
-// Path to save files: /home/jean-moussi/Desktop/RetroFM/src/songs
 const uploadDir = path.join(__dirname, '/public/songs');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -24,10 +23,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Serve static HTML/JS files from src/public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Upload route
 app.post('/upload', upload.single('myfile'), (req, res) => {
     if (!req.file) {
         console.log('No file received in request');
