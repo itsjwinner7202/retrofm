@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RetroFM</title>
+    <style>
+        .upload-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #872341;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function handleFileUpload(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            var formData = new FormData();
+            formData.append('myfile', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                alert('Uploaded successfully!');
+                var queue = document.getElementById('queue');
+                queue.innerHTML += '<p><font color="white">' + data.filename + '</font></p>';
+            })
+            .catch(function(error) {
+                console.error('Upload error:', error);
+            });
+        }
+    </script>
+</head>
+<body bgcolor="09122c">
+    <center><h1><font color="white">RetroFM</font></h1></center>
+    <p> </p>
+    <center><h2><font color="white">Welcome to RetroFM, upload songs to start transmitting!</font></h2></center>
+    <p> </p>
+    <center>
+        <label for="upload" class="upload-button"><font size="6">Upload Song</font></label>
+        <input id="upload" type="file" style="display: none" name="myfile" accept=".mp3, .wav, .ogg" onchange="handleFileUpload(event)">
+    </center>
+    <p> </p>
+    <center><h1><font color="white">Playback Controls:</font></h1></center>
+    <div style="text-align: center; margin-top: 10px;">
+        <button type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #872341; color: white; cursor: pointer; font-size: 22px;">Play</button>
+        <button type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #872341; color: white; cursor: pointer; font-size: 22px;">Skip</button>
+    </div>
+    <p> </p>
+    <center><h2><font color="white">Song Queue:</font></h2></center>
+    <center>
+        <div id="queue"></div>
+    </center>
+</body>
+</html>
