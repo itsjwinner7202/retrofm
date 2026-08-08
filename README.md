@@ -32,6 +32,7 @@ sudo bash install.sh
 ##  Features & Enclosure
 
 * **Intuitive Web UI:** Upload and manage music tracks directly through your browser.
+* **Built-in Wi-Fi captive portal:** On boot the Pi broadcasts a Wi-Fi network named `RetroFM` that redirects clients to the RetroFM dashboard.
 * **Integrated 3D Case:** Includes custom 3D-printable enclosure files (STL) tailored for the Raspberry Pi Zero layout and antenna mount.
 
 ---

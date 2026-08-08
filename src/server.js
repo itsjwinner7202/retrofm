@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 
 app.use(express.json());
 
@@ -49,6 +49,19 @@ function getWavDurationSync(filePath) {
         return null;
     }
 }
+
+const captiveRoutes = [
+    '/generate_204',
+    '/hotspot-detect.html',
+    '/connecttest.txt',
+    '/ncsi.txt',
+    '/success.txt',
+    '/library/test/success.html'
+];
+
+app.get(captiveRoutes, (req, res) => {
+    res.redirect('/');
+});
 
 function playNextInQueue() {
     if (currentKillTimer) {
@@ -104,6 +117,14 @@ function playNextInQueue() {
 }
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
+    if (req.path.startsWith('/api/') || req.path === '/upload' || req.path === '/play' || req.path === '/clear') {
+        return next();
+    }
+    return res.redirect('/');
+});
 
 app.get('/api/songs', (req, res) => {
     fs.readdir(uploadDir, (err, files) => {

@@ -20,7 +20,7 @@ fi
 echo "Installing RetroFM to ${INSTALL_DIR}..."
 
 apt-get update
-apt-get install -y nodejs npm build-essential libsndfile1-dev libsoxr-dev git
+apt-get install -y nodejs npm build-essential libsndfile1-dev libsoxr-dev git hostapd dnsmasq
 
 if ! command -v node >/dev/null 2>&1; then
   if command -v nodejs >/dev/null 2>&1; then
@@ -36,7 +36,7 @@ mkdir -p "${INSTALL_DIR}"
 rsync -a --delete --exclude='.git' "${SCRIPT_DIR}/" "${INSTALL_DIR}/"
 
 cd "${INSTALL_DIR}/src"
-pm install
+npm install
 
 cd "${INSTALL_DIR}/src/PiFmAdv/src"
 make clean
@@ -44,6 +44,61 @@ make
 
 mkdir -p "${INSTALL_DIR}/src/public/songs"
 chmod 755 "${INSTALL_DIR}/src/public/songs"
+
+echo "Configuring RetroFM Wi-Fi access point and captive portal..."
+
+HOSTAPD_CONF=/etc/hostapd/hostapd.conf
+if [ ! -f "${HOSTAPD_CONF}" ]; then
+  cat > "${HOSTAPD_CONF}" <<'EOF'
+interface=wlan0
+driver=nl80211
+ssid=RetroFM
+hw_mode=g
+channel=6
+ieee80211n=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+EOF
+fi
+
+DEFAULT_HOSTAPD=/etc/default/hostapd
+if [ -f "${DEFAULT_HOSTAPD}" ]; then
+  if grep -q '^DAEMON_CONF=' "${DEFAULT_HOSTAPD}"; then
+    sed -i "s|^DAEMON_CONF=.*|DAEMON_CONF=\"${HOSTAPD_CONF}\"|" "${DEFAULT_HOSTAPD}"
+  else
+    echo "DAEMON_CONF=\"${HOSTAPD_CONF}\"" >> "${DEFAULT_HOSTAPD}"
+  fi
+else
+  echo "DAEMON_CONF=\"${HOSTAPD_CONF}\"" > "${DEFAULT_HOSTAPD}"
+fi
+
+DNSMASQ_CONF=/etc/dnsmasq.d/retrofm.conf
+cat > "${DNSMASQ_CONF}" <<'EOF'
+interface=wlan0
+dhcp-range=192.168.50.10,192.168.50.100,255.255.255.0,24h
+address=/#/192.168.50.1
+no-resolv
+cache-size=0
+EOF
+
+DHCPCD_CONF=/etc/dhcpcd.conf
+if ! grep -q '^interface wlan0' "${DHCPCD_CONF}"; then
+  cat >> "${DHCPCD_CONF}" <<'EOF'
+
+interface wlan0
+    static ip_address=192.168.50.1/24
+    nohook wpa_supplicant
+EOF
+fi
+
+systemctl unmask hostapd
+systemctl enable hostapd
+systemctl enable dnsmasq
+systemctl restart dhcpcd
+systemctl restart hostapd
+systemctl restart dnsmasq
 
 CONFIG_FILE=/boot/config.txt
 if [ -f "${CONFIG_FILE}" ]; then
