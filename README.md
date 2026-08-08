@@ -25,8 +25,32 @@ tar -xzf retrofm.tar.gz -C /tmp/retrofm-install --strip-components=1
 cd /tmp/retrofm-install
 sudo bash install.sh
 ```
+### Post-Installation Setup
 
+After installation completes, verify everything is working:
 
+```bash
+sudo bash verify-install.sh
+```
+
+Then connect to the WiFi network named **`RetroFM`** from another device and open your browser to:
+- **http://192.168.50.1** (automatic captive portal)
+- Or manually navigate if auto-redirect doesn't work
+
+### Troubleshooting
+
+If the WiFi portal doesn't appear:
+
+```bash
+# Check service status
+sudo systemctl status retrofm.service
+
+# View live logs
+sudo journalctl -u retrofm.service -f
+
+# Restart the service
+sudo systemctl restart retrofm.service
+```
 ---
 
 ##  Features & Enclosure

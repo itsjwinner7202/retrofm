@@ -13,6 +13,13 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Verify PiFmAdv binary exists
+const fmhandlerPath = path.join(__dirname, 'PiFmAdv', 'src', 'pi_fm_adv');
+if (!fs.existsSync(fmhandlerPath)) {
+    console.error(`ERROR: PiFmAdv binary not found at ${fmhandlerPath}`);
+    console.error('The FM transmitter will not work. Please run the installer again.');
+}
+
 // Storage configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -51,12 +58,27 @@ function getWavDurationSync(filePath) {
 }
 
 const captiveRoutes = [
+    // iOS & macOS
     '/generate_204',
     '/hotspot-detect.html',
+    
+    // Android
     '/connecttest.txt',
+    
+    // Windows
     '/ncsi.txt',
     '/success.txt',
-    '/library/test/success.html'
+    '/ncp.txt',
+    
+    // Generic/Other devices
+    '/library/test/success.html',
+    '/probe.xml',
+    '/captive',
+    '/start',
+    '/canonical.html',
+    '/wifi-status.txt',
+    '/status.html',
+    '/login.html'
 ];
 
 app.get(captiveRoutes, (req, res) => {
@@ -78,12 +100,18 @@ function playNextInQueue() {
 
     const next = playbackQueue[currentIndex];
     const songPath = path.join(uploadDir, next);
-    const fmhandler = path.join(__dirname, 'PiFmAdv', 'src', 'pi_fm_adv');
+
+    if (!fs.existsSync(fmhandlerPath)) {
+        console.error(`PiFmAdv binary not found at ${fmhandlerPath}. Skipping playback.`);
+        currentIndex++;
+        setTimeout(playNextInQueue, 500);
+        return;
+    }
 
     try {
         const duration = getWavDurationSync(songPath);
         console.log('Starting playback:', next, 'frequency=', currentFrequency, 'expectedSeconds=', duration);
-        const child = spawn(fmhandler, ["--audio", songPath, "--freq", currentFrequency.toString(), "--preemph", "eu", "--rds", "--rt", "RETROFM", "--ps", "RETROFM"], {
+        const child = spawn(fmhandlerPath, ["--audio", songPath, "--freq", currentFrequency.toString(), "--preemph", "eu", "--rds", "--rt", "RETROFM", "--ps", "RETROFM"], {
             cwd: __dirname,
             stdio: ['ignore', process.stdout, process.stderr]
         });

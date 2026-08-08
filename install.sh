@@ -40,7 +40,16 @@ npm install
 
 cd "${INSTALL_DIR}/src/PiFmAdv/src"
 make clean
-make
+if ! make; then
+  echo "Error: Failed to compile PiFmAdv. Check that build-essential and required libraries are installed."
+  exit 1
+fi
+
+if [ ! -f "${INSTALL_DIR}/src/PiFmAdv/src/pi_fm_adv" ]; then
+  echo "Error: pi_fm_adv binary was not created. Compilation may have failed silently."
+  exit 1
+fi
+echo "Successfully compiled PiFmAdv to ${INSTALL_DIR}/src/PiFmAdv/src/pi_fm_adv"
 
 mkdir -p "${INSTALL_DIR}/src/public/songs"
 chmod 755 "${INSTALL_DIR}/src/public/songs"
@@ -84,7 +93,7 @@ cache-size=0
 EOF
 
 DHCPCD_CONF=/etc/dhcpcd.conf
-if ! grep -q '^interface wlan0' "${DHCPCD_CONF}"; then
+if ! grep -q 'interface wlan0' "${DHCPCD_CONF}"; then
   cat >> "${DHCPCD_CONF}" <<'EOF'
 
 interface wlan0
@@ -93,21 +102,39 @@ interface wlan0
 EOF
 fi
 
+# Verify wlan0 interface exists
+if ! ip link show wlan0 > /dev/null 2>&1; then
+  echo "Warning: wlan0 interface not found. WiFi hardware may not be available."
+fi
+
 systemctl unmask hostapd
 systemctl enable hostapd
 systemctl enable dnsmasq
 systemctl restart dhcpcd
-systemctl restart hostapd
-systemctl restart dnsmasq
 
-CONFIG_FILE=/boot/config.txt
-if [ -f "${CONFIG_FILE}" ]; then
-  cp -n "${CONFIG_FILE}" "${CONFIG_FILE}.retrofm.bak"
-  if grep -q '^gpu_freq=' "${CONFIG_FILE}"; then
-    echo "gpu_freq setting already present in ${CONFIG_FILE}; leaving it unchanged."
-  else
-    echo 'gpu_freq=250' >> "${CONFIG_FILE}"
-    echo "Added gpu_freq=250 to ${CONFIG_FILE}."
+# Verify services started successfully
+if ! systemctl restart hostapd 2>&1; then
+  echo "Error: Failed to start hostapd. Check /etc/hostapd/hostapd.conf configuration."
+  exit 1
+fi
+
+if ! systemctl restart dnsmasq 2>&1; then
+  echo "Error: Failed to start dnsmasq. Check /etc/dnsmasq.d/retrofm.conf configuration."
+  exit 1
+fi
+
+# Only modify gpu_freq for Pi 2/3/4 (skip for Pi Zero and Pi 1)
+PI_MODEL=$(grep -oP 'Revision\s*:\s*\K.*' /proc/cpuinfo | tail -1)
+if [ ! -z "${PI_MODEL}" ]; then
+  CONFIG_FILE=/boot/config.txt
+  if [ -f "${CONFIG_FILE}" ]; then
+    cp -n "${CONFIG_FILE}" "${CONFIG_FILE}.retrofm.bak"
+    if grep -q '^gpu_freq=' "${CONFIG_FILE}"; then
+      echo "gpu_freq setting already present in ${CONFIG_FILE}; leaving it unchanged."
+    else
+      echo 'gpu_freq=250' >> "${CONFIG_FILE}"
+      echo "Added gpu_freq=250 to ${CONFIG_FILE}."
+    fi
   fi
 fi
 
@@ -122,6 +149,18 @@ systemctl daemon-reload
 systemctl enable ${SERVICE_FILE_NAME}
 systemctl restart ${SERVICE_FILE_NAME}
 
+echo ""
 echo "RetroFM installation complete."
 echo "Service is enabled and started as ${SERVICE_FILE_NAME}."
-echo "Browse to http://<raspberry-pi-ip>:3000 to use RetroFM."
+echo ""
+echo "Next steps:"
+echo "1. Connect to 'RetroFM' WiFi network from another device"
+echo "2. Open your browser and go to http://192.168.50.1"
+echo "3. You should see the captive portal redirect automatically"
+echo ""
+echo "If auto-redirect doesn't work, try:"
+echo "  - Visiting http://192.168.50.1 directly"
+echo "  - Or http://192.168.50.1:80"
+echo ""
+echo "To check service status: sudo systemctl status retrofm.service"
+echo "To view logs: sudo journalctl -u retrofm.service -f"
