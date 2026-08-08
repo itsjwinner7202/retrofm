@@ -28,9 +28,9 @@
                 return response.json();
             })
             .then(function(data) {
-                alert('Uploaded successfully!');
+                alert('Uploaded: ' + data.filename);
                 var queue = document.getElementById('queue');
-                queue.innerHTML += '<p><font color="white">' + data.filename + '</font></p>';
+                queue.innerHTML += '<p><font color="white" size="6"><b>' + data.filename + '</b></font></p>';
             })
             .catch(function(error) {
                 console.error('Upload error:', error);
@@ -52,7 +52,7 @@
     <center><h1><font color="white">Playback Controls:</font></h1></center>
     <div style="text-align: center; margin-top: 10px;">
         <button type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #872341; color: white; cursor: pointer; font-size: 22px;">Play</button>
-        <button type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #872341; color: white; cursor: pointer; font-size: 22px;">Skip</button>
+        <button type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #872341; color: white; cursor: pointer; font-size: 22px;">Clear</button>
     </div>
     <p> </p>
     <center><h2><font color="white">Song Queue:</font></h2></center>

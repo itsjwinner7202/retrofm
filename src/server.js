@@ -23,6 +23,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const { spawn } = require('child_process')
+
+const child = spawn('python3', ['src/retrofm.py']);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/upload', upload.single('myfile'), (req, res) => {
