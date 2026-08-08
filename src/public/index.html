@@ -6,7 +6,7 @@
         .upload-button {
             display: inline-block;
             padding: 8px 16px;
-            background: #872341;
+            background: #24496b;
             color: white;
             border-radius: 6px;
             cursor: pointer;
@@ -29,16 +29,83 @@
             })
             .then(function(data) {
                 alert('Uploaded: ' + data.filename);
-                var queue = document.getElementById('queue');
-                queue.innerHTML += '<p><font color="white" size="6"><b>' + data.filename + '</b></font></p>';
+                refreshQueue();
             })
             .catch(function(error) {
                 console.error('Upload error:', error);
             });
         }
+
+        function playFM() {
+            var freqInput = document.getElementById('frequency');
+            var freqValue = parseFloat(freqInput.value);
+            if (isNaN(freqValue) || freqValue < 76.0 || freqValue > 108.0) {
+                alert('Please enter a valid frequency between 76.0 and 108.0 MHz.');
+                return;
+            }
+
+            fetch('/play', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ freq: freqValue })
+            })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    alert(data.message + ' @ ' + freqValue + ' MHz');
+                })
+                .catch(function(error) {
+                    console.error('Play error:', error);
+                    alert('Unable to start playback.');
+                });
+        }
+
+        function clearqueue() {
+            fetch('/clear', { method: 'POST' })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    alert(data.message);
+                    refreshQueue();
+                })
+                .catch(function(error) {
+                    console.error('Clear error:', error);
+                    alert('Unable to clear queue.');
+                });
+        }
+
+        function renderQueue(songs) {
+            var queue = document.getElementById('queue');
+            queue.innerHTML = '';
+            songs.forEach(function(s) {
+                var el = document.createElement('p');
+                el.innerHTML = '<font color="white" size="6"><b>' + s.filename + '</b></font>';
+                queue.appendChild(el);
+            });
+        }
+
+        function refreshQueue() {
+            fetch('/api/songs')
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data && data.songs) renderQueue(data.songs);
+                })
+                .catch(function(err) {
+                    console.error('Failed to refresh queue:', err);
+                });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('play').addEventListener('click', playFM);
+            document.getElementById('clear').addEventListener('click', clearqueue);
+            refreshQueue();
+        });
     </script>
 </head>
-<body bgcolor="09122c">
+<body bgcolor="071f35">
     <center><h1><font color="white">RetroFM</font></h1></center>
     <p> </p>
     <center><h2><font color="white">Welcome to RetroFM, upload songs to start transmitting!</font></h2></center>
@@ -51,8 +118,10 @@
     <p> </p>
     <center><h1><font color="white">Playback Controls:</font></h1></center>
     <div style="text-align: center; margin-top: 10px;">
-        <button type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #872341; color: white; cursor: pointer; font-size: 22px;">Play</button>
-        <button type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #872341; color: white; cursor: pointer; font-size: 22px;">Clear</button>
+        <label style="color: white; font-size: 20px; margin-right: 8px;">Frequency (MHz):</label>
+        <input id="frequency" type="number" step="0.1" min="76.0" max="108.0" value="103.3" style="width: 100px; padding: 8px; margin-right: 16px; border-radius: 6px; border: 1px solid #ccc; font-size: 18px;">
+        <button id="play" type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #24496b; color: white; cursor: pointer; font-size: 22px;">Play</button>
+        <button id="clear" type="button" style="margin: 0 6px; padding: 8px 14px; border: none; border-radius: 6px; background: #24496b; color: white; cursor: pointer; font-size: 22px;">Clear</button>
     </div>
     <p> </p>
     <center><h2><font color="white">Song Queue:</font></h2></center>
