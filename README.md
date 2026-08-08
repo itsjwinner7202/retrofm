@@ -14,10 +14,25 @@ RetroFM is a Raspberry Pi-based FM radio transmitter featuring an intuitive web 
 
 ---
 
+##  Install
+
+
+```bash
+cd /tmp
+curl -L -o retrofm.tar.gz https://codeload.github.com/itsjwinner7202/retrofm/tar.gz/main
+mkdir -p /tmp/retrofm-install
+tar -xzf retrofm.tar.gz -C /tmp/retrofm-install --strip-components=1
+cd /tmp/retrofm-install
+sudo bash install.sh
+```
+
+
+---
+
 ##  Features & Enclosure
 
 * **Intuitive Web UI:** Upload and manage music tracks directly through your browser.
-* **Integrated 3D Case:** Includes custom 3D-printable enclosure files (STLs/CAD) tailored for the Raspberry Pi Zero layout and antenna mount.
+* **Integrated 3D Case:** Includes custom 3D-printable enclosure files (STL) tailored for the Raspberry Pi Zero layout and antenna mount.
 
 ---
 
