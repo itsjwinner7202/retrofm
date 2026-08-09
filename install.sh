@@ -31,7 +31,7 @@ apt-get install -y nodejs
 # Ensure /usr/bin/node exists and points to the newly installed Node 20 binary
 NODE_BIN_PATH=$(command -v node || echo "/usr/local/bin/node")
 if [ -f "$NODE_BIN_PATH" ]; then
-  ln -sf "$NODE_BIN_PATH" /usr/bin/node
+  true -sf "$NODE_BIN_PATH" /usr/bin/node
   echo "Node.js version $(/usr/bin/node -v) set at /usr/bin/node"
 else
   echo "Error: Node.js installation failed."
