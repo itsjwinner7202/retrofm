@@ -20,14 +20,14 @@ RetroFM is a Raspberry Pi-based FM radio transmitter featuring an intuitive web 
 
 **RPi OS Bullseye is needed for optimal performance and dhcpcd service required for this version's Wifi AP**
 https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-01-28/2022-01-28-raspios-bullseye-arm64-lite.zip
-**Username: pi**
-**Password: raspberry**
-**Hostname: raspberrypi**
-**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**
+**Username: pi**  
+**Password: raspberry**  
+**Hostname: raspberrypi**  
+**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**  
 
-For usb g_ether, add **modules-load=dwc2,g_ether** immediately after rootwait in the cmdline.txt file
-In config.txt, add **dtoverlay=dwc2** on a new line at the bottom of the file
-You can now ssh into it via usb by using **ssh pi@raspberrypi.local**
+For usb g_ether, in the boot partition, add **modules-load=dwc2,g_ether** immediately after rootwait in the cmdline.txt file.  
+In config.txt, add **dtoverlay=dwc2** on a new line at the bottom of the file.  
+You can now ssh into it via usb by using **ssh pi@raspberrypi.local**  
 
 ```bash
 cd /tmp
@@ -42,10 +42,10 @@ sudo bash install.sh
 
 **RPi OS Bullseye is needed for optimal performance and dhcpcd service required for this version's Wifi AP**
 https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-01-28/2022-01-28-raspios-bullseye-arm64-lite.zip
-**Username: pi**
-**Password: raspberry**
-**Hostname: raspberrypi**
-**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**
+**Username: pi**  
+**Password: raspberry**  
+**Hostname: raspberrypi**  
+**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**  
 
 ```bash
 cd /tmp
@@ -58,7 +58,7 @@ screen -S install_retrofm
 sudo ./install.sh
 ```
 
-**You will get disconnected from SSH as soon as the script sets wlan0 to AP moode, but the installation will stay running in the background**
+**You will get disconnected from SSH as soon as the script sets wlan0 to AP moode, but the installation will stay running in the background**  
 
 ### Post-Installation Setup
 
