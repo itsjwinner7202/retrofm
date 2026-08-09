@@ -14,8 +14,20 @@ RetroFM is a Raspberry Pi-based FM radio transmitter featuring an intuitive web 
 
 ---
 
+**Make sure your pi is connected to the internet before running the install.sh script**
+
 ##  Install (over ssh ethernet/ssh usb g_ether/monitor)
 
+**RPi OS Bullseye is needed for optimal performance and dhcpcd service required for this version's Wifi AP**
+https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-01-28/2022-01-28-raspios-bullseye-arm64-lite.zip
+**Username: pi**
+**Password: raspberry**
+**Hostname: raspberrypi**
+**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**
+
+For usb g_ether, add **modules-load=dwc2,g_ether** immediately after rootwait in the cmdline.txt file
+In config.txt, add **dtoverlay=dwc2** on a new line at the bottom of the file
+You can now ssh into it via usb by using **ssh pi@raspberrypi.local**
 
 ```bash
 cd /tmp
@@ -28,6 +40,12 @@ sudo bash install.sh
 
 ##  Install (over wifi ssh)
 
+**RPi OS Bullseye is needed for optimal performance and dhcpcd service required for this version's Wifi AP**
+https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-01-28/2022-01-28-raspios-bullseye-arm64-lite.zip
+**Username: pi**
+**Password: raspberry**
+**Hostname: raspberrypi**
+**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**
 
 ```bash
 cd /tmp
@@ -56,7 +74,7 @@ Then connect to the WiFi network named **`RetroFM`** from another device and ope
 
 ### Troubleshooting
 
-**For Wifi terminal access, connect to RetroFM network then ssh into it: <user>@192.168.50.1**
+**For Wifi terminal access, connect to RetroFM network then ssh into it: pi@192.168.50.1**
 
 If the WiFi portal doesn't appear:
 
