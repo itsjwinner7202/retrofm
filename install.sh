@@ -19,17 +19,23 @@ fi
 
 echo "Installing RetroFM to ${INSTALL_DIR}..."
 
+# Update base packages and curl/ca-certificates
 apt-get update
-apt-get install -y nodejs npm build-essential libsndfile1-dev libsoxr-dev git hostapd dnsmasq
+apt-get install -y curl ca-certificates build-essential libsndfile1-dev libsoxr-dev git hostapd dnsmasq rsync
 
-if ! command -v node >/dev/null 2>&1; then
-  if command -v nodejs >/dev/null 2>&1; then
-    ln -sf "$(command -v nodejs)" /usr/bin/node
-    echo "Created /usr/bin/node symlink for nodejs."
-  else
-    echo "Error: node or nodejs is not installed after apt-get."
-    exit 1
-  fi
+# Install Node.js v20 LTS via NodeSource
+echo "Setting up Node.js 20.x repository..."
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
+
+# Ensure /usr/bin/node exists and points to the newly installed Node 20 binary
+NODE_BIN_PATH=$(command -v node || echo "/usr/local/bin/node")
+if [ -f "$NODE_BIN_PATH" ]; then
+  ln -sf "$NODE_BIN_PATH" /usr/bin/node
+  echo "Node.js version $(/usr/bin/node -v) set at /usr/bin/node"
+else
+  echo "Error: Node.js installation failed."
+  exit 1
 fi
 
 mkdir -p "${INSTALL_DIR}"
