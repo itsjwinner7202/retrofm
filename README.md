@@ -40,6 +40,8 @@ screen -S install_retrofm
 sudo ./install.sh
 ```
 
+**You will get disconnected from SSH as soon as the script sets wlan0 to AP moode, but the installation will stay running in the background**
+
 ### Post-Installation Setup
 
 After installation completes, verify everything is working:
@@ -53,6 +55,8 @@ Then connect to the WiFi network named **`RetroFM`** from another device and ope
 - Or manually navigate if auto-redirect doesn't work
 
 ### Troubleshooting
+
+**For Wifi terminal access, connect to RetroFM network then ssh into it: <user>@192.168.50.1**
 
 If the WiFi portal doesn't appear:
 
