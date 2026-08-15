@@ -1,33 +1,121 @@
 # RetroFM
 
-RetroFM is a Raspberry Pi-based FM radio transmitter featuring an intuitive web interface for uploading, queueing, and playing audio files.
+A Raspberry Pi-based FM transmitter with a Wi-Fi control panel and a custom 3D-printed enclosure.
 
->  **IMPORTANT DISCLAIMER & LEGAL NOTICE** 
-> 
-> **1. RF Compliance & Harmonics:** 
-> Broadcasting on FM frequencies without a license is illegal in most countries. Raspberry Pi GPIO pins output square waves that generate significant RF harmonics across unintended frequency bands (including air traffic control and emergency bands). You **MUST** connect a suitable **bandpass filter (BPF)** to the output pin (GPIO 4 / Pin 7) before transmitting.
->
-> **2. Disclaimer of Liability:** 
-> This project is provided "AS IS" for educational and experimental purposes only. The creators and contributors of RetroFM take no responsibility for any interference caused, regulatory fines incurred, or legal action taken as a result of using this software or hardware design. Operational compliance rests entirely on the end user.
->
-> **3.This project is intended strictly for ultra-low-power, short-range experimental use within your immediate vehicle or room.**
+![RetroFM](shots/retrofm_render.png)
 
----
+## What is RetroFM?
 
-**Make sure your pi is connected to the internet before running the install.sh script**
+RetroFM turns a Raspberry Pi into a small FM radio station.
 
-##  Install (over ssh ethernet/ssh usb g_ether/monitor)
+The Pi creates its own Wi-Fi network. You can connect to it from a phone or computer, open the web interface, upload audio, manage the queue, and control playback.
 
-**RPi OS Bullseye is needed for optimal performance and dhcpcd service required for this version's Wifi AP**
-https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-01-28/2022-01-28-raspios-bullseye-arm64-lite.zip
-**Username: pi**  
-**Password: raspberry**  
-**Hostname: raspberrypi**  
-**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**  
+It doesn't need an existing Wi-Fi network once it's installed.
 
-For usb g_ether, in the boot partition, add **modules-load=dwc2,g_ether** immediately after rootwait in the cmdline.txt file.  
-In config.txt, add **dtoverlay=dwc2** on a new line at the bottom of the file.  
-You can now ssh into it via usb by using **ssh pi@raspberrypi.local**  
+## Features
+
+* FM transmission using PiFmAdv
+* Web interface for uploading and managing audio
+* Audio queue and playback controls
+* Built-in Wi-Fi access point
+* Captive portal
+* RDS station information
+* Automatic startup with systemd
+* Installation and verification scripts
+* Custom 3D-printable enclosure
+
+## Web Interface
+
+The web interface is designed to be used from a phone, tablet, or computer connected to RetroFM.
+
+![RetroFM Web Interface](shots/webinterface.png)
+
+From the interface, you can:
+
+* Upload audio files
+* Add tracks to the queue
+* Manage the queue
+* Control playback
+* Change the FM frequency
+
+## Installation
+
+### Requirements
+
+RetroFM currently requires **Raspberry Pi OS Bullseye**.
+
+This version is used because RetroFM's Wi-Fi access point setup depends on `dhcpcd`. Newer Raspberry Pi OS releases use a different networking setup, so Bullseye is currently the supported version.
+
+You will also need:
+
+* A Raspberry Pi
+* A microSD card
+* A suitable power supply
+* A working Wi-Fi interface
+* An FM antenna or suitable RF setup
+* An internet connection during installation
+
+The Pi must be connected to the internet **before running `install.sh`**. The installer downloads packages and dependencies during setup.
+
+### Preparing Raspberry Pi OS
+
+After flashing Raspberry Pi OS Bullseye, enable SSH before starting the installation.
+
+Create an empty file named:
+
+```text
+ssh
+```
+
+with **no file extension** in the boot partition of the SD card.
+
+The default hostname used in the setup is:
+
+```text
+raspberrypi
+```
+
+If you're using a different hostname or username, adjust the SSH commands below accordingly.
+
+## Installing over SSH
+
+There are several ways to get into the Pi before installation.
+
+### Ethernet SSH
+
+Connect the Pi to your network with Ethernet and SSH into it normally.
+
+### USB SSH with `g_ether`
+
+If you're using a Raspberry Pi Zero over USB, you can use USB Ethernet instead.
+
+In the boot partition, add this immediately after `rootwait` in `cmdline.txt`:
+
+```text
+modules-load=dwc2,g_ether
+```
+
+Then add this to the bottom of `config.txt`:
+
+```text
+dtoverlay=dwc2
+```
+
+After booting the Pi, you can connect over USB with:
+
+```bash
+ssh pi@raspberrypi.local
+```
+
+These changes allow the Pi to appear as a USB Ethernet device when connected to a computer.
+
+### Monitor and keyboard
+
+You can also connect a monitor and keyboard directly to the Pi and run the installation locally.
+
+## Install RetroFM
+
+Once you're connected to the Pi, download the repository:
 
 ```bash
 cd /tmp
@@ -35,17 +123,43 @@ curl -L -o retrofm.tar.gz https://codeload.github.com/itsjwinner7202/retrofm/tar
 mkdir -p /tmp/retrofm-install
 tar -xzf retrofm.tar.gz -C /tmp/retrofm-install --strip-components=1
 cd /tmp/retrofm-install
+```
+
+Then run:
+
+```bash
 sudo bash install.sh
 ```
 
-##  Install (over wifi ssh)
+The installer handles:
 
-**RPi OS Bullseye is needed for optimal performance and dhcpcd service required for this version's Wifi AP**
-https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-01-28/2022-01-28-raspios-bullseye-arm64-lite.zip
-**Username: pi**  
-**Password: raspberry**  
-**Hostname: raspberrypi**  
-**Dont forget to create an empty ssh file with no extension in the boot partition on the sdcard after flashing**  
+* Required system packages
+* Node.js
+* Node.js dependencies
+* PiFmAdv compilation
+* The RetroFM Wi-Fi access point
+* The captive portal
+* The RetroFM system service
+
+The installer installs the project to `/opt/retrofm`.
+
+## Installing over Wi-Fi SSH
+
+If you're connected to the Pi through its normal Wi-Fi connection, there is one important thing to know.
+
+First, install `screen`:
+
+```bash
+sudo apt-get install -y screen
+```
+
+Start a screen session:
+
+```bash
+screen -S install_retrofm
+```
+
+Then download and install RetroFM:
 
 ```bash
 cd /tmp
@@ -53,66 +167,115 @@ curl -L -o retrofm.tar.gz https://codeload.github.com/itsjwinner7202/retrofm/tar
 mkdir -p /tmp/retrofm-install
 tar -xzf retrofm.tar.gz -C /tmp/retrofm-install --strip-components=1
 cd /tmp/retrofm-install
-sudo apt-get install -y screen
-screen -S install_retrofm
 sudo ./install.sh
 ```
 
-**You will get disconnected from SSH as soon as the script sets wlan0 to AP moode, but the installation will stay running in the background**  
+### Important: SSH will disconnect
 
-### Post-Installation Setup
+During installation, RetroFM changes `wlan0` into the RetroFM access point.
 
-After installation completes, verify everything is working:
+This **will disconnect your current SSH connection**.
+
+That's expected.
+
+Because the installer is running inside `screen`, the installation continues in the background after your SSH connection drops. Don't assume the installation failed just because SSH disconnected.
+
+## After Installation
+
+Once the installation has finished, verify that everything was installed correctly:
 
 ```bash
 sudo bash verify-install.sh
 ```
 
-Then connect to the WiFi network named **`RetroFM`** from another device and open your browser to:
-- **http://192.168.50.1** (automatic captive portal)
-- Or manually navigate if auto-redirect doesn't work
-
-### Troubleshooting
-
-**For Wifi terminal access, connect to RetroFM network then ssh into it: pi@192.168.50.1**
-
-If the WiFi portal doesn't appear:
-
-```bash
-# Check service status
-sudo systemctl status retrofm.service
-
-# View live logs
-sudo journalctl -u retrofm.service -f
-
-# Restart the service
-sudo systemctl restart retrofm.service
-```
----
-
-##  Features & Enclosure
-
-* **Intuitive Web UI:** Upload and manage music tracks directly through your browser.
-* **Built-in Wi-Fi captive portal:** On boot the Pi broadcasts a Wi-Fi network named `RetroFM` that redirects clients to the RetroFM dashboard.
-* **Integrated 3D Case:** Includes custom 3D-printable enclosure files (STL) tailored for the Raspberry Pi Zero layout and antenna mount.
-
----
-
-##  License & Third-Party Credits
-
-This project is licensed under the **GNU General Public License v3.0 (GPLv3)** - see the [LICENSE](LICENSE) file for details.
-
-### Third-Party Software & Works
-
-* **pifmadv:** This project uses [pifmadv](https://github.com/miegl/PiFmAdv), an advanced FM transmitter software for Raspberry Pi, licensed under the GNU General Public License v3.0 (GPLv3).
-* **RetroFM Enclosure Design:** The 3D enclosure models included in this repository are released under the **GNU GPLv3** alongside the software codebase.
-
-### Filter Example
+RetroFM should then create a Wi-Fi network named:
 
 ```text
-Raspberry Pi               Filter Module                Antenna
-[ GPIO 4 ] ───▶ [ 56nH Inductor ] ──┬── [ 56nH Inductor ] ───▶  [ Wire ]
-                                    │
-                                [ 22pF ]
-                                    │
-[  GND   ] ─────────────────────────┴────────────────────────▶  [ GND  ]
+RetroFM
+```
+
+Connect to that network from your phone or computer.
+
+Then open:
+
+```text
+http://192.168.50.1
+```
+
+Supported devices should be redirected to the RetroFM interface through the captive portal.
+
+If the automatic redirect doesn't work, open the address manually.
+
+## SSH After Installation
+
+You can still access the Pi through the RetroFM Wi-Fi network.
+
+Connect to the `RetroFM` network and run:
+
+```bash
+ssh pi@192.168.50.1
+```
+
+This is useful for checking logs, restarting services, or troubleshooting without connecting another network cable.
+
+## Troubleshooting
+
+### The Wi-Fi portal doesn't appear
+
+Check the RetroFM service:
+
+```bash
+sudo systemctl status retrofm.service
+```
+
+To watch its logs:
+
+```bash
+sudo journalctl -u retrofm.service -f
+```
+
+To restart it:
+
+```bash
+sudo systemctl restart retrofm.service
+```
+
+If you're troubleshooting after installation, make sure you're connected to the `RetroFM` Wi-Fi network first.
+
+## Hardware and Enclosure
+
+RetroFM is built around a Raspberry Pi and uses PiFmAdv for FM transmission.
+
+The project also includes a custom enclosure designed around the Raspberry Pi Zero layout and antenna mount.
+
+The STL file is available here:
+
+```text
+models/RetroFM.stl
+```
+
+You can print it yourself if you want to build the physical version of RetroFM.
+
+## RF and Legal Notice
+
+**Please make sure FM transmission is legal where you live before using RetroFM.**
+
+Broadcasting on FM frequencies may require a license depending on your location. Using unauthorized frequencies or power levels can also interfere with other radio services.
+
+The Raspberry Pi GPIO output also produces harmonics outside the intended FM frequency. A suitable **band-pass filter (BPF)** should be connected between GPIO 4 (Pin 7) and the antenna before transmitting.
+
+The basic setup is:
+
+```text
+Raspberry Pi              Filter                Antenna
+[ GPIO 4 ] ──────────▶ [ Band-pass ] ───────▶ [ Wire ]
+[  GND   ] ────────────[   Filter   ]──────────[ GND ]
+```
+
+RetroFM is provided as-is for educational and experimental use. You are responsible for making sure your use of the project follows the laws and regulations that apply to you.
+
+### Third-Party Software
+
+RetroFM uses [PiFmAdv](https://github.com/ChristopheJacquet/PiFmAdv), an FM transmitter for Raspberry Pi, which is also licensed under GPLv3.
+
+The RetroFM enclosure design included in this repository is released under GPLv3 as well.
